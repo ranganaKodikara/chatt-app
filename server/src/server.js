@@ -6,12 +6,12 @@ import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { app, server } from "./lib/socket.js";
+
 import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
-
 const PORT = process.env.PORT || 3301;
-const __dirname = path.resolve();
 
 app.use(express.json());
 app.use(cookieParser());
@@ -22,16 +22,20 @@ app.use(
   })
 );
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientBuildPath = path.join(__dirname, "../../client/dist");
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.use(express.static(clientBuildPath));
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client", "dist", "index.html"));
-    console.log(`Serving the Client from Backend`);
+    res.sendFile(path.join(clientBuildPath, "index.html"));
   });
 }
+
+
 
 server.listen(PORT, () => {
   console.log(`Server is running on PORT: ${PORT}`);
