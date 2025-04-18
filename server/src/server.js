@@ -28,11 +28,12 @@ const clientBuildPath = path.join(__dirname, "../../client/dist");
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "development") {
   app.use(express.static(clientBuildPath));
-  // app.get("*", (req, res) => {
-  //   res.sendFile(path.join(clientBuildPath, "index.html"));
-  // });
+
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(clientBuildPath, "index.html"));
+  });
 }
 
 server.listen(PORT, () => {
