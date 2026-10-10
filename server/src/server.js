@@ -9,6 +9,7 @@ import { app, server } from "./lib/socket.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
+import { errorHandler } from "./middleware/error.middleware.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 3301;
@@ -16,10 +17,10 @@ const PORT = process.env.PORT || 3301;
 app.use(express.json());
 app.use(cookieParser());
 app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
+    cors({
+        origin: process.env.CLIENT_URL,
+        credentials: true,
+    })
 );
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,14 +30,16 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(clientBuildPath));
+    app.use(express.static(clientBuildPath));
 
-  app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(clientBuildPath, "index.html"));
-  });
+    app.get(/^\/(?!api).*/, (req, res) => {
+        res.sendFile(path.join(clientBuildPath, "index.html"));
+    });
 }
 
+app.use(errorHandler);
+
 server.listen(PORT, () => {
-  console.log(`Server is running on PORT: ${PORT}`);
-  connectDB();
+    console.log(`Server is running on PORT: ${PORT}`);
+    connectDB();
 });
